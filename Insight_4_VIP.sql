@@ -1,6 +1,6 @@
 USE instacart_analytics;
 
--- Block 1: Find the maximum number of lifetime orders placed by each unique user
+-- Step 1: Find the absolute maximum number of lifetime orders for each user.
 WITH UserLifetimeSpends AS (
     SELECT 
         user_id,
@@ -9,21 +9,21 @@ WITH UserLifetimeSpends AS (
     GROUP BY user_id
 ),
 
--- Block 2: Automatically tag each user based on their loyalty score
+-- Step 2: Separate users into different loyalty groups based on their order totals.
 UserTiers AS (
     SELECT 
         user_id,
         total_lifetime_orders,
         CASE 
-            -- If a user has ordered 30 or more times, tag them as an elite VIP
+            -- VIP status is given to anyone with 30 or more orders.
             WHEN total_lifetime_orders >= 30 THEN 'VIP Power Spender'
-            -- Otherwise, tag them as a regular casual shopper
+            -- All other accounts are labeled as casual shoppers.
             ELSE 'Casual Shopper'
         END AS customer_business_tier
     FROM UserLifetimeSpends
 )
 
--- Block 3: Count the users in each group and calculate their average habits
+-- Step 3: Count total users and find the average order numbers for each group.
 SELECT 
     customer_business_tier,
     COUNT(user_id) AS total_users_in_tier,

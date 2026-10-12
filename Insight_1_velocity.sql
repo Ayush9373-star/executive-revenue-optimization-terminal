@@ -1,23 +1,23 @@
 USE instacart_analytics;
 
--- Step 1: Create a clean summary table of users and their timelines
+-- Step 1: Gather all the users and their shopping timelines.
 WITH UserOrderTimelines AS (
     SELECT 
         user_id,
         order_number,
         days_since_prior_order
     FROM orders
-    -- Exclude the very first order because there is no prior waiting time (-1)
+    -- Filter out the first order: new accounts have no previous wait time.
     WHERE days_since_prior_order != -1 
 )
 
--- Step 2: Calculate the average time gap for each order step in a user's lifecycle
+-- Step 2: Find the average days between purchases for each milestone.
 SELECT 
     order_number AS order_sequence_position,
     COUNT(user_id) AS total_orders_analyzed,
     ROUND(AVG(days_since_prior_order), 1) AS avg_days_since_last_purchase
 FROM UserOrderTimelines
--- Look at the first 10 sequential orders to spot the pattern cleanly
+-- Limit the scan to the first 10 orders: this isolates early habit changes.
 WHERE order_number <= 10 
 GROUP BY order_number
 ORDER BY order_number ASC;
